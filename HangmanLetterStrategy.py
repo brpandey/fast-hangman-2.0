@@ -49,6 +49,7 @@ class HangmanLetterStrategy:
 		self._current_pass_size = 0
 
 		self._last_word = None
+		self._guessed_last_word = False
 
 		#Initialize the HangmanWordPassEngine with the secret word length
 		self._engine = HangmanWordPassEngine(game.get_secret_word_length(), \
@@ -124,13 +125,18 @@ class HangmanLetterStrategy:
 		pass_size = self._current_pass_size
 
 		if pass_size == 0: 
-			error = "Exhausted all words, word not in dictionary"
+			error = "Game over, exhausted all words, word not in dictionary"
 			#raise Exception("Word not in dictionary")
 
 		elif pass_size == 1:
-			word = self._last_word
-			guess = GuessWord(word)
-			self._last_guess = word
+			if self._guessed_last_word != True:
+				word = self._last_word
+				guess = GuessWord(word)
+				self._last_guess = word
+				self._guessed_last_word = True
+			else: 
+				error = "Game over, exhausted all words, word not in dictionary"
+
 
 		# most of the game play is where the pass size hasn't dwindled down to 0 or 1
 		else:

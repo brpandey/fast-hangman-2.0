@@ -1,7 +1,6 @@
 import copy
 import itertools
 import os
-import time
 
 from collections import Counter
 
@@ -58,6 +57,8 @@ class HangmanWordPassEngine:
 	_sorted_dictfile = None
 	_passfile_A = None	
 	_passfile_B = None
+	_unchanging_randval = '234902358039284234832893842'
+
 
 
 	def __init__(self, answer_length, settings, mystery_letter):
@@ -153,7 +154,7 @@ class HangmanWordPassEngine:
 			#file_pass_B = (word for word in self._settings.get_dictfile_words(self._answer_length))
 			file_pass_B = (word for word in HangmanWordPassEngine.__get_grouped_words(self._answer_length))
 
-			tally, pass_size, _ = self.__process_and_tally_filtered_generator(None, file_pass_B)
+			tally, pass_size, _ = self.__process_and_tally_filtered_generator(set(), file_pass_B)
 
 			letter_strategy.set_letter_counts(pass_size, tally)
 
@@ -168,7 +169,7 @@ class HangmanWordPassEngine:
 
 		try:
 			#make the log name hard to guess
-			id = str(int(time.time()*1000)) 
+			id = HangmanWordPassEngine._unchanging_randval 
 
 			if HangmanWordPassEngine._passfile_A == None and \
 				HangmanWordPassEngine._passfile_B == None:
@@ -238,8 +239,6 @@ class HangmanWordPassEngine:
 			try:
 				words_iter = iter(self._current_words_pipeline_readable)
 				word = words_iter.next()
-
-				#print 'possible hangman words: ', word
 
 				yield word
 			except StopIteration:
@@ -401,11 +400,13 @@ class HangmanWordPassEngine:
 	def __sort_and_write_dictfile_words(settings):
 		"""
 		Function to read and then sort lines from dictionary file
+		Assuming the dictionary words are well formed words and unique
+
 		"""
 
 		try:
 			#make the log name hard to guess
-			id = str(int(time.time()*1000))
+			id = HangmanWordPassEngine._unchanging_randval
 
 			fdr = open(settings.get_dictfile_name())
 			HangmanWordPassEngine._sorted_dictfile = open("words_sorted_" + id + ".txt",'w')
@@ -426,8 +427,10 @@ class HangmanWordPassEngine:
 	@staticmethod
 	def __get_sorted_dictfile_words():
 		"""
-		Generator function to read each word (line) from dictionary file
+		Generator function to read each word (line) from sorted dictionary file
 		"""
+		
+		#last_read_word = None
 
 		try:
 			if HangmanWordPassEngine._sorted_dictfile.closed: 
@@ -439,8 +442,15 @@ class HangmanWordPassEngine:
 				for wordline in fd:
 					word = wordline.strip().lower()
 
-					#if(len(word) == length): 
+					#performance hit
+					#nice to have but not necessary given well-formed dictionary assumption
+					#since this is a sorted file we can easily skip duplicates just in case
+					#if last_read_word != None and last_read_word == word: continue
+
 					yield word
+
+					#last_read_word = word
+
 
 		except IOError as e:
 			print 'gd Operation failed: %s' % e
@@ -454,8 +464,6 @@ class HangmanWordPassEngine:
    			if group_key == key: 
    				for word in igroup:
    					yield word
-
-
 
 	
 	def __read_passfile_words(self):
@@ -480,27 +488,6 @@ class HangmanWordPassEngine:
 		except IOError as e:
 			print 'rp Operation failed: %s' % e
 
-	def __write_passfile(self, (words_generator)):
-		"""
-		Function to write each word from a generator to a pass file
-		"""
-
-		self._current_write_passfile = next(self._passfile_cycle)
-
-		try:
-			if self._current_write_passfile.closed: 
-				self._current_write_passfile = open(self._current_write_passfile.name, 'w')
-
-			with self._current_write_passfile as fd:
-				for word in iter(words_generator):
-
-					fd.write("{}\n".format(word))
-
-
-		except IOError as e:
-			print 'wp Operation failed: %s' % e
-
-		self._previous_write_passfile = self._current_write_passfile
 
 
 	def __write_and_tally_passfile(self, exclusion, (words_generator)):
@@ -514,7 +501,7 @@ class HangmanWordPassEngine:
 	 	provided, ignore the letters found in the exclusion set e.g. already guessed letters.
 		"""
 
-		assert(words_generator != None)
+		assert(exclusion != None and words_generator != None)
 
 		tally = Counter()
 

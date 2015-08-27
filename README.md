@@ -89,7 +89,7 @@ Usage:
 
 $ python PlayHangman.py -h
 usage: Hangman [-h] -f [DICTFILE] [-w SECRETS [SECRETS ...]]
-               [-display {simple,normal,chatty,noisy,debug}] [-clk] [-bl]
+               [-display {simple,normal,chatty}] [-clk] [-bl]
                [--batch [BATCHFILE]]
 
 Please enter a hangman word or specify a list of hangman words
@@ -99,7 +99,7 @@ optional arguments:
   -f [DICTFILE]         dictionary file name
   -w SECRETS [SECRETS ...]
                         specify hangman word(s)
-  -display {simple,normal,chatty,noisy,debug}
+  -display {simple,normal,chatty}
                         output display verbosity level
   -clk, --clock         enable timing output
   -bl, --baseline       run hangman against pre-specified baseline

@@ -1,3 +1,4 @@
+import re
 import argparse
 
 from HangmanDisplay import HangmanDisplay
@@ -57,6 +58,8 @@ class HangmanSettings:
 	def __init__(self):
 		args = self.__argparse()
 
+		self._regex_non_characters = re.compile('[^a-zA-Z]')
+
 		self._dictfile = args.dictfile
 
 		if args.secrets == None:
@@ -89,6 +92,7 @@ class HangmanSettings:
 	#convenience function for engine
 	def get_dictfile_name(self): return self._dictfile.name
 
+	#assuming the dictionary words are well formed words and unique
 	def get_dictfile_words(self, length):
 		"""
 		Generator function to read each word (line) from dictionary file
@@ -118,6 +122,12 @@ class HangmanSettings:
 
 		if self._batchfile == None:
 			for secret in self._secrets:
+
+				val = bool(self._regex_non_characters.search(secret))
+
+				if val == True: 
+					raise Exception("hangman secret contains non-characters: " + secret)
+
 				yield secret.lower()
 
 		else:
