@@ -197,7 +197,7 @@ class HangmanLetterStrategy:
 
 		assert(sum(tally.values()) > 0 and pass_size > 1)
 
-		letter, count = self.__strategic_letter_most_common_hybrid(tally, pass_size)
+		letter, count = self.__letter_most_common_hybrid(tally, pass_size)
 
 		msg = "letter is {}, counts is {}, pass_size is {}"
 		self._display.chatty(msg.format(letter, count, pass_size))
@@ -205,7 +205,7 @@ class HangmanLetterStrategy:
 		return letter
 
 
-	def __strategic_letter_most_common(self, tally, pass_size):
+	def __letter_most_common(self, tally, pass_size):
 		"""
 		Most common letter retrieval strategy.  
 		Get the first letter with the highest frequency in the possible hangman word set.
@@ -229,7 +229,7 @@ class HangmanLetterStrategy:
 	
 		return letter, count
 
-	def __strategic_letter_most_common_hybrid(self, tally, pass_size):
+	def __letter_most_common_hybrid(self, tally, pass_size):
 		"""
 		Most common letter retrieval strategy with a twist.  
 		Get the first letter with the highest frequency for when the current possible 
@@ -294,7 +294,7 @@ class HangmanLetterStrategy:
 		return letter, count
 
 
-	def __strategic_letter_closest_half(self, tally, pass_size):
+	def __letter_closest_half(self, tally, pass_size):
 		"""
 		Choose the letter based on letter frequency count that is closest to half the 
 		current possible hangman word set size 
