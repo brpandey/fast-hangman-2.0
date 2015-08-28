@@ -207,7 +207,7 @@ class HangmanWordPassEngine:
 		exclusion - exclusion set of letters already guessed
 		'''
 
-		self._current_filter_pass_params = pass_params_tuple_vector
+		self._current_pass_params = pass_params_tuple_vector
 
 
 	def reduce(self):
@@ -219,7 +219,7 @@ class HangmanWordPassEngine:
 		"""
 
 		last_guess_correct, guess, hangman_pattern, hangman_tally, regex, exclusion \
-			 = self._current_filter_pass_params
+			 = self._current_pass_params
 
 		assert(last_guess_correct != None and guess != None and exclusion != None \
 			and hangman_pattern != None and hangman_tally != None and regex != None)
@@ -277,7 +277,7 @@ class HangmanWordPassEngine:
 			Nothing
 		"""
 
-		_, wrong_letter, _, _, _, exclusion  = self._current_filter_pass_params
+		_, wrong_letter, _, _, _, exclusion  = self._current_pass_params
 
 		#generator comprehension to generate all words that don't have the letter
 		#store the filtered pass
@@ -296,7 +296,7 @@ class HangmanWordPassEngine:
 		words_filtered_stream = itertools.ifilter(None, \
 				itertools.imap(self.__filter_candidate_word_regex, self.__possible_hangman_words()))
 
-		_, _, _, _, _, exclusion  = self._current_filter_pass_params
+		_, _, _, _, _, exclusion  = self._current_pass_params
 
 		updated_state_tuple = self.__process_and_tally_filtered_stream(exclusion, words_filtered_stream)
 
@@ -306,10 +306,10 @@ class HangmanWordPassEngine:
 	def __filter_candidate_word_regex(self, word):
 		"""
 		Determine if there is a match using the compiled regex and the candidate word
-		Faster than the regular __filter_candidate_word
+		Much faster than the regular __filter_candidate_word
 		"""
 		
-		_, _, _, _, regex, _  = self._current_filter_pass_params
+		_, _, _, _, regex, _  = self._current_pass_params
 
 		if regex.match(word) == None: return False
 
@@ -325,7 +325,7 @@ class HangmanWordPassEngine:
 			c) words whose positions for 'letter' don't match are candidates
 		"""
 
-		_, correct_letter, hangman_pattern, hangman_tally, _, _  = self._current_filter_pass_params
+		_, correct_letter, hangman_pattern, hangman_tally, _, _  = self._current_pass_params
 
 		assert(word != None  and correct_letter != None and hangman_tally != None)
 
