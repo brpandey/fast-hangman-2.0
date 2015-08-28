@@ -87,6 +87,7 @@ class HangmanWordPassEngine:
 
 
 	@staticmethod
+	#remove leftover files
 	def cleanup():
 		try:
 			if HangmanWordPassEngine._sorted_dictfile != None:
@@ -106,6 +107,7 @@ class HangmanWordPassEngine:
 			print 'Operation failed: %s' % e
 
 	@staticmethod
+	#sort the dictionary file and write it out
 	def initialize(settings):
 		
 		if HangmanWordPassEngine._static_initalized == False:
@@ -131,7 +133,7 @@ class HangmanWordPassEngine:
 
 		counter = None
 
-		# access class static _letter_counters dict for cached copy of counter
+		# access class static _letter_counters dict for possible cached copy of counter
 		counter_tuple = HangmanWordPassEngine._letter_counters.get(self._answer_length)
 
 		if counter_tuple != None: pass_size, counter = counter_tuple
@@ -164,7 +166,7 @@ class HangmanWordPassEngine:
 
 		self._display.chatty("Finished setup")
 
-	#helper routine
+	#helper routine to setup engine pass files
 	def __initialize_passfiles(self):
 
 		try:
@@ -180,7 +182,7 @@ class HangmanWordPassEngine:
 
 			passfile_sequence = [HangmanWordPassEngine._passfile_A, HangmanWordPassEngine._passfile_B]
 			
-			# cycle between files for reading and writing
+			# setup cycle to alternate files for reading and writing
 			self._passfile_cycle = itertools.cycle(passfile_sequence)
 			self._current_write_passfile = None
 
@@ -232,7 +234,7 @@ class HangmanWordPassEngine:
 
 	def __possible_hangman_words(self):
 		"""
-		Generator function to iterate through the current word pass sequence
+		Generator function to iterate through the current hangman word pass sequence
 		"""
 
 		while True:
@@ -266,7 +268,7 @@ class HangmanWordPassEngine:
 	def __filter_wrong_guess(self):
 		"""
 		Reduce the word set space, 
-		knowing that words containing 'letter' are candidates for removal
+		Words containing 'letter' are candidates for removal
 	
 		Args:
 			self
@@ -287,13 +289,12 @@ class HangmanWordPassEngine:
 
 	def __filter_correct_guess(self):
 		"""
-		Reduce the word set space, using a generator
+		Reduce the word set space, examining each candidate word from a generator
 		Returns: Nothing
 		"""
 
 		words_filtered_pass = itertools.ifilter(None, \
 				itertools.imap(self.__filter_candidate_word_regex, self.__possible_hangman_words()))
-
 
 		_, _, _, _, _, exclusion  = self._current_filter_pass_params
 
@@ -303,6 +304,10 @@ class HangmanWordPassEngine:
 
 
 	def __filter_candidate_word_regex(self, word):
+		"""
+		Determine if there is a match using the compiled regex and the candidate word
+		Faster than the regular __filter_candidate_word
+		"""
 		
 		_, _, _, _, regex, _  = self._current_filter_pass_params
 
@@ -401,7 +406,6 @@ class HangmanWordPassEngine:
 		"""
 		Function to read and then sort lines from dictionary file
 		Assuming the dictionary words are well formed words and unique
-
 		"""
 
 		try:
@@ -456,6 +460,7 @@ class HangmanWordPassEngine:
 			print 'gd Operation failed: %s' % e
 
 	@staticmethod
+	#takes sorted file and returns the word in relevant word group arranged by length
 	def __get_grouped_words(group_key):
 		
 		for key, igroup in \

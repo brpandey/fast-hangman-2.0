@@ -97,6 +97,7 @@ class HangmanLetterStrategy:
 			hangman_tally = Counter(hangman_pattern)
 			del hangman_tally[self._mystery_letter]
 
+			# Create string representation of set
 			exclude_str = ''.join(str(x) for x in self._guessed_letters)
 
 			# For each mystery_letter replace it with [^characters already guessed]
@@ -104,23 +105,25 @@ class HangmanLetterStrategy:
 
 			regex = re.compile(repat)
 	
-			#if the last guess was a letter, update the engine state accordingly
+			# If the last guess was a letter, update the engine state accordingly
 			if len(self._last_guess) == 1:
 
+				# Use for filtering sequence
 				pass_params_tuple_vector = (last_guess_correct, self._last_guess, \
 					hangman_pattern, hangman_tally, regex, self._guessed_letters)
 
 				self._engine.set_pass_params(pass_params_tuple_vector)
 
+				# Reduce the engine word set
 				tally, pass_size, self._last_word = self._engine.reduce()
 
+				# Record the counts
 				self.set_letter_counts(pass_size, tally)
 
 		if self._display.ischatty():
 			guessed = game.get_guessed_so_far()
 			self._display.chatty("All guessed letters so far are {}".format(guessed))
 			#self._display.chatty('regex pattern: {}'.format(repat))
-
 
 		pass_size = self._current_pass_size
 

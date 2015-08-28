@@ -3,6 +3,9 @@ Hangman written in Python 2.7
 Uses functional style of programming (think itertools)
 using python generators and pass files for each run.  Very fast too!
 
+
+
+
 Example:
 
 python PlayHangman.py -f words.txt -clk -w avocado
@@ -32,6 +35,9 @@ AVOCADO; score=6; status=GAME_WON
 
 AVOCADO: 6
 [CLK][4][1440657847096][902][691] End time
+
+
+
 
 
 
@@ -80,6 +86,8 @@ ERUPTIVE; score=5; status=GAME_WON
 
 
 ERUPTIVE: 5
+
+
 
 
 
