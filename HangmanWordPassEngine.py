@@ -71,7 +71,7 @@ class HangmanWordPassEngine:
 		self._current_pass = 1
 		#self._regex_used = 0
 
-		self.__initialize_passfiles()
+		self.__initialize_passes()
 
 
 	def __del__(self):
@@ -83,7 +83,7 @@ class HangmanWordPassEngine:
 		self._current_write_passfile = None
 		self._current_read_passfile = None
 		self._previous_write_passfile = None
-		self._passfile_cycle = None
+		self._pass_cycle = None
 
 
 	@staticmethod
@@ -145,18 +145,20 @@ class HangmanWordPassEngine:
 			# Set first pass of dictionary words
 		
 			# grab the words from the sorted dictionary file using the get_dictfile_stream
-			file_pass_A = (word for word in HangmanWordPassEngine.__get_grouped_words(self._answer_length))
+			pass_A = \
+				(word for word in HangmanWordPassEngine.__get_grouped_words_stream(self._answer_length))
 			
-			self._current_words_pipeline_readable = file_pass_A
+			self._current_words_pipeline_readable = pass_A
 		
 		else:
 			# Second pass of dictionary words
 			# tally all the dictionary words and store for later
 
 			#file_pass_B = (word for word in self._settings.get_dictfile_words(self._answer_length))
-			file_pass_B = (word for word in HangmanWordPassEngine.__get_grouped_words(self._answer_length))
+			pass_B = \
+				(word for word in HangmanWordPassEngine.__get_grouped_words_stream(self._answer_length))
 
-			tally, pass_size, _ = self.__process_and_tally_filtered_stream(set(), file_pass_B)
+			tally, pass_size, _ = self.__process_and_tally_filtered_stream(set(), pass_B)
 
 			letter_strategy.set_letter_counts(pass_size, tally)
 
@@ -167,7 +169,7 @@ class HangmanWordPassEngine:
 		self._display.chatty("Finished setup")
 
 	#helper routine to setup engine pass files
-	def __initialize_passfiles(self):
+	def __initialize_passes(self):
 
 		try:
 			#make the log name hard to guess
@@ -180,15 +182,14 @@ class HangmanWordPassEngine:
 				HangmanWordPassEngine._passfile_A = open("pass_" + id + "_A.log", 'w')
 				HangmanWordPassEngine._passfile_B = open("pass_" + id + "_B.log", 'w')
 
-			passfile_sequence = [HangmanWordPassEngine._passfile_A, HangmanWordPassEngine._passfile_B]
+			pass_sequence = [HangmanWordPassEngine._passfile_A, HangmanWordPassEngine._passfile_B]
 			
 			# setup cycle to alternate files for reading and writing
-			self._passfile_cycle = itertools.cycle(passfile_sequence)
+			self._pass_cycle = itertools.cycle(pass_sequence)
 			self._current_write_passfile = None
 
 		except IOError as e:
 			print 'Operation failed: %s' % e
-
 
 
 	def set_pass_params(self, pass_params_tuple_vector):
@@ -460,8 +461,8 @@ class HangmanWordPassEngine:
 			print 'gd Operation failed: %s' % e
 
 	@staticmethod
-	#takes sorted file and returns the word in relevant word group arranged by length
-	def __get_grouped_words(group_key):
+	#acquires the sorted dictionary stream and returns the word in relevant word group arranged by length
+	def __get_grouped_words_stream(group_key):
 		
 		for key, igroup in \
 			itertools.groupby(HangmanWordPassEngine.__get_sorted_dict_stream(), lambda x: len(x)):
@@ -513,7 +514,7 @@ class HangmanWordPassEngine:
 		word_num = -1
 		last_word = None
 
-		self._current_write_passfile = next(self._passfile_cycle)
+		self._current_write_passfile = next(self._pass_cycle)
 
 		try:
 			if self._current_write_passfile.closed: 
