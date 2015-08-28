@@ -30,7 +30,7 @@ if __name__ == '__main__':
 		total += score
 		count += 1
 
-		display.bare("{}: {}".format(secret.upper(), score))
+		display.bare("{}: {}\n".format(secret.upper(), score))
 
 		#display.clock("Finished game\n")
 

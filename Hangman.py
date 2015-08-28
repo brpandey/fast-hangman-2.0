@@ -48,7 +48,7 @@ class Hangman:
 			strategy - HangmanStrategy
 		"""
 
-		self._display.normal("secret: {}".format(secret))
+		self._display.normal("(SHHH!!) hangman secret: {}\n".format(secret))
 		
 		game = HangmanGame(secret, maxincorrect)
 				

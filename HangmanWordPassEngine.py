@@ -115,7 +115,7 @@ class HangmanWordPassEngine:
 			settings.display.clock("Statically Initializing engine 0.1")
 			HangmanWordPassEngine.__sort_and_write_dictfile_words(settings)
 			
-			settings.display.clock("Statically Initializing engine 0.2")
+			settings.display.clock("Statically Initializing engine 0.2\n")
 
 
 		HangmanWordPassEngine._static_initalized = True
