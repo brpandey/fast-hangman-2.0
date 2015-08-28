@@ -144,7 +144,7 @@ class HangmanWordPassEngine:
 					
 			# Set first pass of dictionary words
 		
-			# grab the words from the sorted dictionary file using the get_dictfile_words generator
+			# grab the words from the sorted dictionary file using the get_dictfile_stream
 			file_pass_A = (word for word in HangmanWordPassEngine.__get_grouped_words(self._answer_length))
 			
 			self._current_words_pipeline_readable = file_pass_A
@@ -156,7 +156,7 @@ class HangmanWordPassEngine:
 			#file_pass_B = (word for word in self._settings.get_dictfile_words(self._answer_length))
 			file_pass_B = (word for word in HangmanWordPassEngine.__get_grouped_words(self._answer_length))
 
-			tally, pass_size, _ = self.__process_and_tally_filtered_generator(set(), file_pass_B)
+			tally, pass_size, _ = self.__process_and_tally_filtered_stream(set(), file_pass_B)
 
 			letter_strategy.set_letter_counts(pass_size, tally)
 
@@ -177,8 +177,8 @@ class HangmanWordPassEngine:
 				HangmanWordPassEngine._passfile_B == None:
 				
 				# setup appropriate file streams for pass files
-				HangmanWordPassEngine._passfile_A = open("passfile_" + id + "_A.log", 'w')
-				HangmanWordPassEngine._passfile_B = open("passfile_" + id + "_B.log", 'w')
+				HangmanWordPassEngine._passfile_A = open("pass_" + id + "_A.log", 'w')
+				HangmanWordPassEngine._passfile_B = open("pass_" + id + "_B.log", 'w')
 
 			passfile_sequence = [HangmanWordPassEngine._passfile_A, HangmanWordPassEngine._passfile_B]
 			
@@ -247,19 +247,19 @@ class HangmanWordPassEngine:
 				break;
 
 
-	def __process_and_tally_filtered_generator(self, exclusion, (filtered_generator)):
+	def __process_and_tally_filtered_stream(self, exclusion, (filtered_stream)):
 		"""
-		Store the filtered word pass generator and tally the words while its being written to file.  
+		Store the filtered word pass generator stream and tally the words while its being written to file.  
 		"""
 
-		assert(filtered_generator != None)
+		assert(filtered_stream != None)
 
 		#write to the pass file
-		updated_state_tuple = self.__write_and_tally_passfile(exclusion, filtered_generator)
+		updated_state_tuple = self.__write_and_tally_stream(exclusion, filtered_stream)
 
-		# store generator of file
-		# grab the words from the recently output passfile using the read_passfile_words generator
-		self._current_words_pipeline_readable = (word for word in self.__read_passfile_words())
+		# store the lazy stream of the file
+		# grab the words from the recently output pass using the read_pass_stream function
+		self._current_words_pipeline_readable = (word for word in self.__read_pass_stream())
 
 		return updated_state_tuple
 
@@ -281,24 +281,24 @@ class HangmanWordPassEngine:
 
 		#generator comprehension to generate all words that don't have the letter
 		#store the filtered pass
-		words_filtered_pass = (word for word in self.__possible_hangman_words() if word.find(wrong_letter) == -1)
+		words_filtered_stream = (word for word in self.__possible_hangman_words() if word.find(wrong_letter) == -1)
 
-		updated_state_tuple = self.__process_and_tally_filtered_generator(exclusion, words_filtered_pass)
+		updated_state_tuple = self.__process_and_tally_filtered_stream(exclusion, words_filtered_stream)
 
 		return updated_state_tuple
 
 	def __filter_correct_guess(self):
 		"""
-		Reduce the word set space, examining each candidate word from a generator
+		Reduce the word set space, examining each candidate word from a stream
 		Returns: Nothing
 		"""
 
-		words_filtered_pass = itertools.ifilter(None, \
+		words_filtered_stream = itertools.ifilter(None, \
 				itertools.imap(self.__filter_candidate_word_regex, self.__possible_hangman_words()))
 
 		_, _, _, _, _, exclusion  = self._current_filter_pass_params
 
-		updated_state_tuple = self.__process_and_tally_filtered_generator(exclusion, words_filtered_pass)
+		updated_state_tuple = self.__process_and_tally_filtered_stream(exclusion, words_filtered_stream)
 
 		return updated_state_tuple
 
@@ -413,7 +413,7 @@ class HangmanWordPassEngine:
 			id = HangmanWordPassEngine._unchanging_randval
 
 			fdr = open(settings.get_dictfile_name())
-			HangmanWordPassEngine._sorted_dictfile = open("words_sorted_" + id + ".txt",'w')
+			HangmanWordPassEngine._sorted_dictfile = open("sorted_dictionary_" + id + ".txt",'w')
 
 			lines = fdr.readlines()
 			lines.sort(key=len)
@@ -429,7 +429,7 @@ class HangmanWordPassEngine:
 
 
 	@staticmethod
-	def __get_sorted_dictfile_words():
+	def __get_sorted_dict_stream():
 		"""
 		Generator function to read each word (line) from sorted dictionary file
 		"""
@@ -464,16 +464,16 @@ class HangmanWordPassEngine:
 	def __get_grouped_words(group_key):
 		
 		for key, igroup in \
-			itertools.groupby(HangmanWordPassEngine.__get_sorted_dictfile_words(), lambda x: len(x)):
+			itertools.groupby(HangmanWordPassEngine.__get_sorted_dict_stream(), lambda x: len(x)):
    			
    			if group_key == key: 
    				for word in igroup:
    					yield word
 
 	
-	def __read_passfile_words(self):
+	def __read_pass_stream(self):
 		"""
-		Generator function to read each word (line) from dictionary file
+		Generator function to read each word (line) from pass file
 		"""
 
 		self._current_read_passfile = self._previous_write_passfile
@@ -495,10 +495,10 @@ class HangmanWordPassEngine:
 
 
 
-	def __write_and_tally_passfile(self, exclusion, (words_generator)):
+	def __write_and_tally_stream(self, exclusion, (words_stream)):
 		"""
-		Function to write each word from a generator to a pass file
-		Tallies the generator words while they are being written (saving an extra file read)
+		Function to write each word from a generator strean to a pass file
+		Tallies the words stream while they are being written (saving an extra file read)
 
 		By "tally" - specifically, tally the unique word letters
 		Given a word, tally the various letters in the word by uniqueness.  
@@ -506,7 +506,7 @@ class HangmanWordPassEngine:
 	 	provided, ignore the letters found in the exclusion set e.g. already guessed letters.
 		"""
 
-		assert(exclusion != None and words_generator != None)
+		assert(exclusion != None and words_stream != None)
 
 		tally = Counter()
 
@@ -524,7 +524,7 @@ class HangmanWordPassEngine:
 			#self._display.clock("write and tally passfile 1.23")
 
 			with self._current_write_passfile as fd:
-				for word_num, word in enumerate(iter(words_generator)):
+				for word_num, word in enumerate(iter(words_stream)):
 
 					#self._display.chatty("write_passfile {}, word: {}".format(self._current_write_passfile, word))
 
